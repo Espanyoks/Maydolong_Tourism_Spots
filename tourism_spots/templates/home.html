@@ -1,0 +1,215 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Home | Django Map{% endblock %}
+
+{% block content %}
+<!-- Map container -->
+<div id="map"></div>
+
+<!-- Image Modal -->
+<div id="image-modal" aria-hidden="true">
+    <span id="modal-close" role="button" aria-label="Close image">&times;</span>
+    <img id="modal-img" src="" alt="Preview">
+</div>
+
+
+<!-- Sidebar container -->
+<div id="info-sidebar" class="sidebar">
+    <div id="sidebar-content">
+        <!-- Exit icon -->
+        <span id="close-sidebar" title="Close">&times;</span>
+        
+        <h1>Maydolong Tourism Spots</h1>
+
+        <h2 id="spot-name"></h2>
+        <p><strong>Barangay:</strong> <span id="spot-barangay"></span></p>
+        <p id="spot-description"></p>
+        <div id="spot-images"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+        
+    document.addEventListener('DOMContentLoaded', () => {
+        console.log('DOM ready — starting map script');
+
+        const greenIcon = new L.Icon({
+            iconUrl: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-green.png',
+            shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+            iconSize: [25, 41],
+            iconAnchor: [12, 41],
+            popupAnchor: [1, -34],
+            shadowSize: [41, 41]
+        });
+
+
+        const map = L.map('map', { zoomControl: false }).setView([11.5000, 125.4667], 12);
+
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 19,
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
+
+        L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+        // Sidebar refs
+        const sidebar = document.getElementById('info-sidebar');
+        const spotName = document.getElementById('spot-name');
+        const spotBarangay = document.getElementById('spot-barangay');
+        const spotDescription = document.getElementById('spot-description');
+        const spotImages = document.getElementById('spot-images');
+        const closeBtn = document.getElementById('close-sidebar');
+
+        // Modal refs
+        const imageModal = document.getElementById('image-modal');
+        const modalImg = document.getElementById('modal-img');
+        const modalClose = document.getElementById('modal-close');
+
+        if (!sidebar || !spotImages || !imageModal) {
+            console.warn('One or more expected DOM elements are missing:', { sidebar, spotImages, imageModal });
+        }
+
+        closeBtn?.addEventListener('click', () => {
+            sidebar.classList.remove('active');
+            map.invalidateSize();
+        });
+
+        // Fetch spots
+        fetch("{% url 'tourist_spots_data' %}")
+        .then(response => response.json())
+        .then(spots => {
+            console.log('Loaded spots:', spots?.length ?? 0);
+
+            spots.forEach(spot => {
+                const marker = L.marker([spot.lat, spot.lng], { icon: greenIcon }).addTo(map);
+
+                marker.on('click', () => {
+                    // Fill sidebar
+                    spotName.textContent = spot.name;
+                    spotBarangay.textContent = spot.barangay;
+
+                    const fullText = spot.description || "No description available.";
+                    const maxLength = 100;
+                    spotDescription.innerHTML = "";
+
+                    if (fullText.length > maxLength) {
+                        const shortText = fullText.substring(0, maxLength) + "...";
+                        const descSpan = document.createElement('span');
+                        descSpan.textContent = shortText;
+
+                        const toggleLink = document.createElement('a');
+                        toggleLink.href = "#";
+                        toggleLink.textContent = "Read more";
+                        toggleLink.style.color = "var(--primary-color)";
+                        toggleLink.style.marginLeft = "6px";
+                        toggleLink.style.textDecoration = "none";
+                        toggleLink.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            if (toggleLink.textContent === "Read more") {
+                                descSpan.textContent = fullText;
+                                toggleLink.textContent = "Read less";
+                            } else {
+                                descSpan.textContent = shortText;
+                                toggleLink.textContent = "Read more";
+                            }
+                        });
+
+                        spotDescription.appendChild(descSpan);
+                        spotDescription.appendChild(toggleLink);
+                    } else {
+                        spotDescription.textContent = fullText;
+                    }
+
+                    // Images
+                    spotImages.innerHTML = "";
+                    if (spot.images && spot.images.length > 0) {
+                        spot.images.forEach(imgUrl => {
+                            const img = document.createElement('img');
+                            img.src = imgUrl;
+                            img.alt = spot.name;
+                            img.style.borderRadius = "10px";
+                            img.style.margin = "5px";
+                            img.style.maxWidth = "100%";
+                            img.style.cursor = "pointer";          
+                            img.addEventListener('click', () => {
+                                // Open modal
+                                modalImg.src = img.src;
+                                imageModal.style.display = 'flex';
+                                imageModal.setAttribute('aria-hidden', 'false');
+                                // optional: prevent map interactions under modal
+                                map.dragging.disable?.();
+                                map.touchZoom.disable?.();
+                                map.doubleClickZoom.disable?.();
+                                map.scrollWheelZoom.disable?.();
+                            });
+                            spotImages.appendChild(img);
+                        });
+                    } else {
+                        const empty = document.createElement('p');
+                        empty.textContent = 'No images available.';
+                        empty.style.color = 'var(--font-color)';
+                        spotImages.appendChild(empty);
+                    }
+
+                    // Show sidebar and pan
+                    sidebar.classList.add('active');
+                    map.invalidateSize();
+
+                    const offsetX = sidebar.offsetWidth / 2;
+                    const markerPoint = map.latLngToContainerPoint([spot.lat, spot.lng]);
+                    const newPoint = L.point(markerPoint.x - offsetX, markerPoint.y);
+                    const newLatLng = map.containerPointToLatLng(newPoint);
+                    map.panTo(newLatLng, { animate: true });
+                });
+            });
+        })
+        .catch(error => {
+            console.error('Error loading tourist spots:', error);
+        });
+
+        // Modal close handlers
+        modalClose?.addEventListener('click', () => {
+            imageModal.style.display = 'none';
+            imageModal.setAttribute('aria-hidden', 'true');
+            // re-enable map interactions
+            map.dragging.enable?.();
+            map.touchZoom.enable?.();
+            map.doubleClickZoom.enable?.();
+            map.scrollWheelZoom.enable?.();
+            modalImg.src = '';
+        });
+
+        // click outside image to close
+        imageModal?.addEventListener('click', (e) => {
+            if (e.target === imageModal) {
+                imageModal.style.display = 'none';
+                imageModal.setAttribute('aria-hidden', 'true');
+                map.dragging.enable?.();
+                map.touchZoom.enable?.();
+                map.doubleClickZoom.enable?.();
+                map.scrollWheelZoom.enable?.();
+                modalImg.src = '';
+            }
+        });
+
+        // keyboard ESC to close
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && imageModal.style.display === 'flex') {
+                imageModal.style.display = 'none';
+                imageModal.setAttribute('aria-hidden', 'true');
+                map.dragging.enable?.();
+                map.touchZoom.enable?.();
+                map.doubleClickZoom.enable?.();
+                map.scrollWheelZoom.enable?.();
+                modalImg.src = '';
+            }
+        });
+
+    }); 
+
+</script>
+
+{% endblock %}

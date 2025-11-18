@@ -1,0 +1,215 @@
+:root {
+    --sidebar-bg: #4C763B;
+    --background-color: #4C763B;
+    --font-color: #f8f9fa;
+    --primary-color: #FFFD8F;
+    --accent-color: #B0CE88;
+    --radius: 12px;
+}
+
+body {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    background-color: var(--background-color);
+}
+
+header {
+    text-align: center;
+    background-color: var(--background-color);
+    color: white;
+    padding: 0px;
+}
+
+#content {
+    height: calc(100vh - 40px); 
+    border: var(--background-color) 20px solid; 
+}
+    
+/* Fullscreen map */
+#map {
+    width: 100%;
+    height: 100%;
+    border-radius: var(--radius);
+}
+
+/* ================== Sidebar Styles ================== */
+.sidebar {
+    position: fixed;
+    top: 0;
+    left: -400px;
+    width: 360px;
+    height: 100%;
+    background: var(--sidebar-bg);
+    backdrop-filter: blur(12px);
+    box-shadow: 3px 0 15px rgba(0, 0, 0, 0.25);
+    border-right: 1px solid rgba(255, 255, 255, 0.3);
+    padding: 25px 20px;
+    overflow-y: auto;
+    transition: all 0.5s ease;
+    z-index: 1000;
+    font-family: 'Poppins', sans-serif;
+    opacity: 0;
+    transform: translateX(-30px);
+    pointer-events: none;
+}
+
+.sidebar h1 {
+    margin: 0;
+    font-size: 1.8rem;
+    font-weight: 600 bold;
+    color: var(--font-color);
+    display: flex;
+    justify-content: flex-start;
+    margin-top: 20px;
+    margin-bottom: 15px;
+}
+
+/* Slide in with fade & blur */
+.sidebar.active {
+    left: 0;
+    opacity: 1;
+    transform: translateX(0);
+    pointer-events: all;
+}
+
+.sidebar p {
+    color: var(--font-color);
+}
+
+/* Close (X) button */
+#close-sidebar {
+    position: absolute;
+    top: 12px;
+    right: 15px;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--font-color);
+    transition: color 0.3s ease, transform 0.2s ease;
+}
+
+#close-sidebar:hover {
+    color: #c90808;
+    transform: scale(1.2);
+}
+
+/* Title styling */
+#spot-name {
+    font-size: 1.5rem;
+    font-weight: 600 bold;
+    color: var(--accent-color);
+    margin-top: 20px;
+    margin-bottom: 8px;
+    border-bottom: 2px solid var(--primary-color);
+    padding-bottom: 5px;
+}
+
+/* Barangay label */
+#spot-barangay {
+    color: var(--accent-color);
+    font-weight: 500;
+}
+
+/* Description text */
+#spot-description {
+    color: var(--font-color);
+    line-height: 1.5;
+    font-size: 0.95rem;
+    margin-top: 10px;
+    margin-bottom: 15px;
+}
+
+/* Read More / Read Less link */
+#spot-description a {
+    font-weight: 500;
+    cursor: pointer;
+    color: var(--primary-color);
+    margin-left: 5px;
+    transition: color 0.3s ease;
+}
+
+#spot-description a:hover {
+    color: var(--primary-color);
+    text-decoration: underline;
+}
+
+/* Image section */
+#spot-images {
+    display: flex;
+    overflow-x: auto;
+    gap: 12px;
+    padding-bottom: 12px;
+    scroll-behavior: smooth;
+    border-radius: 12px;
+    margin-top: 10px;
+}
+
+/* Image card style */
+#spot-images img {
+    height: 180px;
+    width: 260px;
+    object-fit: cover;
+    border-radius: 14px;
+    flex-shrink: 0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+#spot-images img:hover {
+    transform: scale(1.05);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.3);
+}
+
+/* Scrollbar styling */
+#spot-images::-webkit-scrollbar {
+    height: 8px;
+}
+
+#spot-images::-webkit-scrollbar-thumb {
+    background-color: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+}
+/* ================== Image Modal (Fullscreen Preview) ================== */
+#image-modal {
+    display: none;                  /* hidden by default */
+    position: fixed;
+    inset: 0;                       /* top:0; right:0; bottom:0; left:0 */
+    background: rgba(0,0,0,0.75);
+    backdrop-filter: blur(3px);
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    padding: 24px;
+}
+
+#image-modal[aria-hidden="false"] {
+    display: flex;
+}
+
+#image-modal img {
+    max-width: 90vw;
+    max-height: 90vh;
+    border-radius: 14px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.5);
+    animation: zoomIn 0.22s ease;
+    object-fit: contain;
+}
+
+/* Close button */
+#modal-close {
+    position: absolute;
+    top: 20px;
+    right: 35px;
+    font-size: 36px;
+    color: white;
+    cursor: pointer;
+    transition: transform 0.15s ease, color 0.15s ease;
+    z-index: 2100;
+}
+
+#modal-close:hover { transform: scale(1.15); color: #ff8b8b; }
+
+/* Zoom animation */
+@keyframes zoomIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+}
+

@@ -1,0 +1,33 @@
+{% load static %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>{% block title %}Django Map{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <link rel="stylesheet" href="{% static 'tourism_spots/css/style.css' %}">
+
+    <!-- Leaflet CSS for maps -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    <!-- Shared header -->
+    <!-- <header>
+        <h1>Maydolong Tourism Spots Map</h1>
+    </header> -->
+
+    <!-- Main page content -->
+    <div id="content">
+        {% block content %}{% endblock %}
+    </div>
+
+    <!-- Leaflet JavaScript -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>
