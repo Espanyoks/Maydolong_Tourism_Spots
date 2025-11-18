@@ -1,0 +1,77 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+*.pkl
+*.py.class
+
+# Virtual environment
+venv/
+env/
+ENV/
+*.env
+
+# Django stuff
+*.log
+django.log
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# If using Django collectstatic
+/static/
+
+# VSCode
+.vscode/
+
+# PyCharm
+.idea/
+
+# Environment variables
+.env
+*.env
+.env.*
+
+# Byte-compiled
+*.cache
+
+# Migrations (optional — keep if you want in repo)
+# Uncomment if you don't want migration files in git
+# */migrations/*
+# !*/migrations/__init__.py
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Pipenv
+Pipfile.lock
+
+# Poetry
+poetry.lock
+
+# Coverage reports
+htmlcov/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+
+# mypy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# pytest
+.pytest_cache/
+
+# Node (if using npm/yarn)
+node_modules/
+
+# Build
+build/
+dist/
+*.egg-info/
